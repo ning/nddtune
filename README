@@ -1,0 +1,45 @@
+nddtune: Solaris SMF ndd tuning for settings not settable in /etc/system
+
+LICENSE
+  See LICENSE for licensing details
+
+REQUIREMENTS:
+  Solaris (10+)
+
+INSTALLATION
+  Copy the nddtune method to the method directory (/lib/svc/method)
+  Make the nddtune method executable
+  Copy the nddtune manifest to the manifest directory (/lib/svc/manifest/system)
+  Import the manifest: svccfg import /lib/svc/manifest/system/nddtune.xml
+
+  Note: Alternatively, you can copy them to a different location, in which case you
+        must update the manifest to reflect the true location of the method repository
+        for the 'start' exec_method.
+
+USAGE:
+  Standard SMF commands (enable, disable, refresh).
+  Note: nddtune currently does NOT implement the disable action (ie, it cannot
+        restore previous values).
+
+CONFIGURARTION
+  The default configuration file is /local/etc/nddtune.cfg but its location can be
+  changed by updating the nddtune/cfgfile property, either by updating the manifest
+  before importing it or by using svccfg setprop:
+
+   svccfg -s svc:/system/nddtune setprop nddtune/cfgfile=/location/for/nddtune.cfg
+
+  The configuration itself is simply the parameters to a ndd -set call. For example:
+
+   /dev/tcp tcp_xmit_hiwat 2883584
+   /dev/tcp tcp_recv_hiwat 2883584
+   /dev/tcp tcp_max_buf 2883584
+
+  Lines can be commented out with a # sign at the beggining of the line.
+
+ERROR HANDLING
+  Check svcs nddtune for service state. nddtune is fairly conservative: if anything
+  causes an error (missing configuration file, error runnig ndd -set), nddtune stops
+  and sets the service to maitenance status. See svc logfile for details.
+
+SOURCE:
+  https://github.com/ning/nddtune

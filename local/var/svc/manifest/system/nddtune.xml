@@ -1,0 +1,41 @@
+<?xml version='1.0'?>
+<!DOCTYPE service_bundle SYSTEM '/usr/share/lib/xml/dtd/service_bundle.dtd.1'>
+<service_bundle type='manifest' name='export'>
+  <service name='system/nddtune' type='service' version='0'>
+    <create_default_instance enabled='true'/>
+    <single_instance/>
+    <dependency name='fs-local' grouping='require_all' restart_on='none' type='service'>
+      <service_fmri value='svc:/system/filesystem/local'/>
+    </dependency>
+    <dependency name='loopback-network' grouping='require_any' restart_on='none' type='service'>
+      <service_fmri value='svc:/network/loopback'/>
+    </dependency>
+    <dependency name='physical-network' grouping='require_all' restart_on='refresh' type='service'>
+      <service_fmri value='svc:/network/physical'/>
+    </dependency>
+    <exec_method name='start' type='method' exec='/local/lib/svc/method/nddtune' timeout_seconds='5'>
+      <method_context/>
+    </exec_method>
+    <exec_method name='stop' type='method' exec=':true' timeout_seconds='3'>
+      <method_context/>
+    </exec_method>
+    <exec_method name='refresh' type='method' exec='/local/lib/svc/method/nddtune' timeout_seconds='5'>
+      <method_context/>
+    </exec_method>
+    <property_group name='startd' type='framework'>
+      <propval name='duration' type='astring' value='transient'/>
+    </property_group>
+    <property_group name='nddtune' type='application'>
+      <propval name='cfgfile' type='astring' value='/local/etc/nddtune.cfg'/>
+    </property_group>
+    <stability value='Unstable'/>
+    <template>
+      <common_name>
+        <loctext xml:lang='C'>ndd tuning</loctext>
+      </common_name>
+      <documentation>
+        <manpage title='ndd' section='1M' manpath='/usr/share/man'/>
+      </documentation>
+    </template>
+  </service>
+</service_bundle>

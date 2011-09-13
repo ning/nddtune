@@ -1,0 +1,20 @@
+#!/sbin/sh
+
+. /lib/svc/share/smf_include.sh
+. /lib/svc/share/net_include.sh
+
+LD_LIBRARY_PATH=/lib; export LD_LIBRARY_PATH
+
+NDDTUNE_CFG=`svcprop -p nddtune/cfgfile $SMF_FMRI`
+
+[ -z "$NDDTUNE_CFG" ] && echo "unable to obtain configuration file path from SMF" >&2 && exit $SMF_EXIT_ERR_CONFIG
+
+if [ -r "$NDDTUNE_CFG" ]; then
+   awk '! /^#/ {print $0}' "$NDDTUNE_CFG" | while read line; do if ! /usr/sbin/ndd -set $line; then echo "error: failed ndd -set $line; aborting." >&2 && exit $SMF_EXIT_ERR_FATAL; fi; done
+else
+   echo "error: missing or unreadable configuration file $NDDTUNE_CFG; aborting." >&2 && exit $SMF_EXIT_ERR_CONFIG
+fi
+
+unset LD_LIBRARY_PATH
+
+exit $SMF_EXIT_OK
